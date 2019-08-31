@@ -82,8 +82,7 @@ public class UltimaRoyale extends JavaPlugin implements Listener {
                 logger.severe("You're using a hybrid minecraft server, this is not officially supported at this time, disabling.");
                 getServer().getPluginManager().disablePlugin(this);
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException ignored) {
         }
 
         logger.info("Loading Configuration Files!");
