@@ -3,7 +3,7 @@ name: Java CI
 on: [push]
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,7 +15,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
       
-  build:
+  build-macOS:
     runs-on: macOS-latest
 
     steps:
