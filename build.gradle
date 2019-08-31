@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group = pluginGroup
@@ -20,6 +21,11 @@ dependencies {
     }
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
 processResources {
     inputs.property "version", version
 
@@ -31,5 +37,31 @@ processResources {
 
     from(sourceSets.main.resources.srcDirs) {
         exclude "plugin.yml"
+    }
+}
+
+publishing {
+    publications {
+        plugin(MavenPublication) { publication ->
+            groupId project.group
+            artifactId project.archivesBaseName
+            version project.version
+
+            from components["java"]
+
+            artifact sourcesJar
+        }
+    }
+
+    repositories {
+        maven {
+            url "https://repo.openprocesses.ml/repsitory/maven-releases"
+            if (project.hasProperty('mavenPassword')) {
+                credentials {
+                    username 'matrixDeploy'
+                    password project.getProperty('mavenPassword')
+                }
+            }
+        }
     }
 }
