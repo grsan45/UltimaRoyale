@@ -18,6 +18,7 @@ public class FileManager {
             plugin.getDataFolder().mkdir();
         }
 
+        Config.reload();
         Config.load();
         Config.save();
         Config.reload();
