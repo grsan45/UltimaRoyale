@@ -1,0 +1,29 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id 'java'
+}
+
+group = pluginGroup
+version = pluginVersion
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://papermc.io/repo/repository/maven-public/' }
+    maven { url = 'http://maven.elmakers.com/repository/' }
+    maven { url = 'http://nexus.hc.to/content/repositories/pub_releases/' }
+}
+
+dependencies {
+    implementation 'com.destroystokyo.paper:paper-api:1.14.4-R0.1-SNAPSHOT'
+    implementation 'de.slikey:EffectLib:6.2-SNAPSHOT'
+    implementation('net.milkbowl.vault:VaultAPI:1.7') {
+        transitive = false
+    }
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [version: version]
+    }
+}

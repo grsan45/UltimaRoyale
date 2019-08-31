@@ -1,0 +1,11 @@
+name: UltimaRoyale
+main: ml.matrixdevteam.ultimaroyale.UltimaRoyale
+version: version
+author: GMatrixGames
+description: The ultimate battle royale plugin
+depends: [Vault, EffectLib]
+commands:
+  battleroyale:
+    aliases: [br]
+  leave:
+    aliases: [gleave, lobby]
