@@ -4,11 +4,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
 public class FileManager {
-    static FileManager instance;
-
-    static {
-        instance = new FileManager();
-    }
+    static FileManager instance = new FileManager();
 
     private FileManager() {
     }
@@ -22,7 +18,6 @@ public class FileManager {
             plugin.getDataFolder().mkdir();
         }
 
-        Config.reload();
         Config.load();
         Config.save();
         Config.reload();

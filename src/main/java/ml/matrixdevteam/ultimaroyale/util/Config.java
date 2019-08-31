@@ -11,13 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Config {
-    private static FileConfiguration config;
-    private static File configFile;
-
-    static {
-        config = null;
-        configFile = null;
-    }
+    private static FileConfiguration config = null;
+    private static File configFile = null;
 
     public static void load() {
         config = getConfig();
@@ -43,7 +38,7 @@ public class Config {
 
     public static void reload() {
         if (configFile == null) {
-            configFile = new File(UltimaRoyale.getInstance().getDataFolder(), "config.yml");
+            configFile = new File("plugins/UltimaRoyale/", "config.yml");
         }
 
         config = YamlConfiguration.loadConfiguration(configFile);
