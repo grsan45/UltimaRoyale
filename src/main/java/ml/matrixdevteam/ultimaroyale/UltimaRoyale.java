@@ -26,7 +26,6 @@ import java.io.File;
 import java.util.logging.Logger;
 
 public class UltimaRoyale extends JavaPlugin implements Listener {
-    private static UltimaRoyale instance;
     public final Logger logger;
     public final Methods methods;
     public final GameListener gameListener;
@@ -131,140 +130,141 @@ public class UltimaRoyale extends JavaPlugin implements Listener {
         if ((label.equalsIgnoreCase("battleroyale") && !(sender instanceof Player))) {
             sender.sendMessage("You need to be a player to perform this command!");
         }
-
-        if ((label.equalsIgnoreCase("battleroyale"))) {
-            final Player player = (Player) sender;
-            if (!Arenas.isInArena(player) && args.length == 0) {
-                sendMessage(player, "Incorrect command, use '/battleroyale help' for help");
-            }
-
-            if (args.length == 1) {
-                if (args[0].equalsIgnoreCase("list")) {
-                    StringBuilder arenas = new StringBuilder("Arena list: " + ChatColor.YELLOW);
-                    for (final Arena arena : Arenas.getArenas().values()) {
-                        arenas.append(arena.getName()).append(", ");
-                    }
-                    sendMessage(player, arenas.toString());
-                } else if (args[0].equalsIgnoreCase("version")) {
-                    sendMessage(player, "Plugin version is &cv" + getDescription().getVersion());
-                } else if (args[0].equalsIgnoreCase("help")) {
-                    sender.sendMessage(ChatColor.GRAY + "------------------" + ChatColor.GOLD + ChatColor.BOLD + " UltimaRoyale " + ChatColor.GRAY + "------------------");
-                    sender.sendMessage("/br setmainlobby" + ChatColor.GRAY + " - Set the main lobby");
-                    sender.sendMessage("/br create <ArenaName> " + ChatColor.GRAY + " - Create an Arena");
-                    sender.sendMessage("/br setlobby <ArenaName> " + ChatColor.GRAY + " - Set the arena lobby");
-                    sender.sendMessage("/br addspawn <ArenaName> " + ChatColor.GRAY + " - Add spawn to your arena");
-                    sender.sendMessage(ChatColor.GRAY + "------------------" + ChatColor.GOLD + ChatColor.BOLD + " UltimaRoyale " + ChatColor.GRAY + "------------------");
+        if (sender instanceof Player) {
+            if ((label.equalsIgnoreCase("battleroyale"))) {
+                final Player player = (Player) sender;
+                if (!Arenas.isInArena(player) && args.length == 0) {
+                    sendMessage(player, "Incorrect command, use '/battleroyale help' for help");
                 }
 
-                if (player.hasPermission("ultimaroyale.admin")) {
-                    if (args[0].equalsIgnoreCase("setmainlobby")) {
-                        Methods.setLobby(player.getLocation());
-                        sendMessage(player, "The main lobby has been set to your location!");
-                    } else if (args[0].equalsIgnoreCase("reload")) {
-                        Methods.loadYamls();
-                        reloadConfig();
+                if (args.length == 1) {
+                    if (args[0].equalsIgnoreCase("list")) {
+                        StringBuilder arenas = new StringBuilder("Arena list: " + ChatColor.YELLOW);
                         for (final Arena arena : Arenas.getArenas().values()) {
-                            arena.updateSigns();
+                            arenas.append(arena.getName()).append(", ");
                         }
+                        sendMessage(player, arenas.toString());
+                    } else if (args[0].equalsIgnoreCase("version")) {
+                        sendMessage(player, "Plugin version is &cv" + getDescription().getVersion());
+                    } else if (args[0].equalsIgnoreCase("help")) {
+                        sender.sendMessage(ChatColor.GRAY + "------------------" + ChatColor.GOLD + ChatColor.BOLD + " UltimaRoyale " + ChatColor.GRAY + "------------------");
+                        sender.sendMessage("/br setmainlobby" + ChatColor.GRAY + " - Set the main lobby");
+                        sender.sendMessage("/br create <ArenaName> " + ChatColor.GRAY + " - Create an Arena");
+                        sender.sendMessage("/br setlobby <ArenaName> " + ChatColor.GRAY + " - Set the arena lobby");
+                        sender.sendMessage("/br addspawn <ArenaName> " + ChatColor.GRAY + " - Add spawn to your arena");
+                        sender.sendMessage(ChatColor.GRAY + "------------------" + ChatColor.GOLD + ChatColor.BOLD + " UltimaRoyale " + ChatColor.GRAY + "------------------");
+                    }
 
-                        sendMessage(player, "Config files reloaded!");
+                    if (player.hasPermission("ultimaroyale.admin")) {
+                        if (args[0].equalsIgnoreCase("setmainlobby")) {
+                            Methods.setLobby(player.getLocation());
+                            sendMessage(player, "The main lobby has been set to your location!");
+                        } else if (args[0].equalsIgnoreCase("reload")) {
+                            Methods.loadYamls();
+                            reloadConfig();
+                            for (final Arena arena : Arenas.getArenas().values()) {
+                                arena.updateSigns();
+                            }
+
+                            sendMessage(player, "Config files reloaded!");
+                        }
+                    }
+
+                    if (args[0].equalsIgnoreCase("lobby")) {
+                        if (!Arenas.isInArena(player)) {
+                            if (Methods.getLobby() != null) {
+                                player.teleport(Methods.getLobby());
+                                sendMessage(player, "Welcome to the main waiting lobby!");
+                            } else {
+                                sendMessage(player, "The lobby does not exist, use '/br list' to view the available arenas.");
+                            }
+                        } else {
+                            final Arena arena = Arenas.getArena(player);
+                            sendMessage(player, "You have left the game, and have been spawned in the lobby.");
+                            arena.removePlayer(player, LeaveReason.QUIT);
+                        }
                     }
                 }
 
-                if (args[0].equalsIgnoreCase("lobby")) {
-                    if (!Arenas.isInArena(player)) {
-                        if (Methods.getLobby() != null) {
-                            player.teleport(Methods.getLobby());
-                            sendMessage(player, "Welcome to the main waiting lobby!");
+                if (args.length == 2 && player.hasPermission("ultimaroyale.admin")) {
+                    if (args[0].equalsIgnoreCase("create")) {
+                        if (!Arenas.arenaExists(args[1])) {
+                            arenas.addDefault("Arenas." + args[1], args[1]);
+                            arenas.addDefault("Arenas." + args[1] + ".Signs.Counter", 0);
+                            getConfig().addDefault(args[1] + ".Countdown", 15);
+                            getConfig().addDefault(args[1] + ".MaxPlayers", 8);
+                            getConfig().addDefault(args[1] + ".AutoStartPlayers", 2);
+                            getConfig().addDefault(args[1] + ".EndTime", 600);
+                            final Arena arena = new Arena(args[1]);
+                            Arenas.addArena(arena);
+                            Methods.addToList(arena);
+                            sendMessage(player, ChatColor.GRAY + "You've created arena: &c" + arena.getName());
+                            Methods.saveYamls();
+                            saveConfig();
                         } else {
-                            sendMessage(player, "The lobby does not exist, use '/br list' to view the available arenas.");
+                            sendMessage(player, ChatColor.RED + "An arena with that name already exists!");
                         }
-                    } else {
-                        final Arena arena = Arenas.getArena(player);
-                        sendMessage(player, "You have left the game, and have been spawned in the lobby.");
-                        arena.removePlayer(player, LeaveReason.QUIT);
-                    }
-                }
-            }
-
-            if (args.length == 2 && player.hasPermission("ultimaroyale.admin")) {
-                if (args[0].equalsIgnoreCase("create")) {
-                    if (!Arenas.arenaExists(args[1])) {
-                        arenas.addDefault("Arenas." + args[1], args[1]);
-                        arenas.addDefault("Arenas." + args[1] + ".Signs.Counter", 0);
-                        getConfig().addDefault(args[1] + ".Countdown", 15);
-                        getConfig().addDefault(args[1] + ".MaxPlayers", 8);
-                        getConfig().addDefault(args[1] + ".AutoStartPlayers", 2);
-                        getConfig().addDefault(args[1] + ".EndTime", 600);
-                        final Arena arena = new Arena(args[1]);
-                        Arenas.addArena(arena);
-                        Methods.addToList(arena);
-                        sendMessage(player, ChatColor.GRAY + "You've created arena: &c" + arena.getName());
-                        Methods.saveYamls();
-                        saveConfig();
-                    } else {
-                        sendMessage(player, ChatColor.RED + "An arena with that name already exists!");
-                    }
-                } else if (args[0].equalsIgnoreCase("delete")) {
-                    if (getConfig().contains(args[1])) {
-                        getConfig().set(args[1], null);
-                        arenas.set("Arenas." + args[1], null);
-                        Methods.removeFromList(args[1]);
-                        Methods.saveYamls();
-                        sendMessage(player, "You've deleted arena: &c" + args[1]);
-                    } else {
-                        sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
-                    }
-                } else if (args[0].equalsIgnoreCase("join")) {
-                    if (Arenas.arenaExists(args[1])) {
-                        final Arena arena = Arenas.getArena(args[1]);
-                        arena.addPlayer(player);
-                    } else {
-                        sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
-                    }
-                } else if (args[0].equalsIgnoreCase("start")) {
-                    if (Arenas.arenaExists(args[1])) {
-                        final Arena arena = Arenas.getArena(args[1]);
-                        if (arena.getPlayers().size() >= 2) {
-                            arena.start();
-                            sendMessage(player, "You've forced the game to start in arena &c" + arena.getName());
+                    } else if (args[0].equalsIgnoreCase("delete")) {
+                        if (getConfig().contains(args[1])) {
+                            getConfig().set(args[1], null);
+                            arenas.set("Arenas." + args[1], null);
+                            Methods.removeFromList(args[1]);
+                            Methods.saveYamls();
+                            sendMessage(player, "You've deleted arena: &c" + args[1]);
                         } else {
-                            sendMessage(player, "The arena cannot be started as there are not enough players.");
+                            sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
                         }
-                    } else {
-                        sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
-                    }
-                } else if (args[0].equalsIgnoreCase("stop")) {
-                    if (Arenas.arenaExists(args[1])) {
-                        final Arena arena = Arenas.getArena(args[1]);
-                        arena.sendAll("A staff member, " + player.getDisplayName() + " has stopped the game!");
-                        arena.stop();
-                    } else {
-                        sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
-                    }
-                } else if (args[0].equalsIgnoreCase("addspawn")) {
-                    if (Arenas.arenaExists(args[1])) {
-                        final Arena arena = Arenas.getArena(args[1]);
-                        arena.addSpawn(player.getLocation());
-                        sendMessage(player, "A spawn has been set to your location in arena &e" + arena.getName());
-                    } else {
-                        sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
-                    }
-                } else if (args[0].equalsIgnoreCase("addchest")) {
-                    if (Arenas.arenaExists(args[1])) {
-                        final Arena arena = Arenas.getArena(args[1]);
-                        arena.addChest(player.getLocation());
-                        sendMessage(player, "A chest spawn has been set to your location in arena &e" + arena.getName());
-                    } else {
-                        sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
-                    }
-                } else if (args[0].equalsIgnoreCase("setlobby")) {
-                    if (Arenas.arenaExists(args[1])) {
-                        final Arena arena = Arenas.getArena(args[1]);
-                        arena.setLobbySpawn(player.getLocation());
-                        sendMessage(player, "A lobby has been set to your location in arena &e" + arena.getName());
-                    } else {
-                        sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
+                    } else if (args[0].equalsIgnoreCase("join")) {
+                        if (Arenas.arenaExists(args[1])) {
+                            final Arena arena = Arenas.getArena(args[1]);
+                            arena.addPlayer(player);
+                        } else {
+                            sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
+                        }
+                    } else if (args[0].equalsIgnoreCase("start")) {
+                        if (Arenas.arenaExists(args[1])) {
+                            final Arena arena = Arenas.getArena(args[1]);
+                            if (arena.getPlayers().size() >= 2) {
+                                arena.start();
+                                sendMessage(player, "You've forced the game to start in arena &c" + arena.getName());
+                            } else {
+                                sendMessage(player, "The arena cannot be started as there are not enough players.");
+                            }
+                        } else {
+                            sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
+                        }
+                    } else if (args[0].equalsIgnoreCase("stop")) {
+                        if (Arenas.arenaExists(args[1])) {
+                            final Arena arena = Arenas.getArena(args[1]);
+                            arena.sendAll("A staff member, " + player.getDisplayName() + " has stopped the game!");
+                            arena.stop();
+                        } else {
+                            sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
+                        }
+                    } else if (args[0].equalsIgnoreCase("addspawn")) {
+                        if (Arenas.arenaExists(args[1])) {
+                            final Arena arena = Arenas.getArena(args[1]);
+                            arena.addSpawn(player.getLocation());
+                            sendMessage(player, "A spawn has been set to your location in arena &e" + arena.getName());
+                        } else {
+                            sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
+                        }
+                    } else if (args[0].equalsIgnoreCase("addchest")) {
+                        if (Arenas.arenaExists(args[1])) {
+                            final Arena arena = Arenas.getArena(args[1]);
+                            arena.addChest(player.getLocation());
+                            sendMessage(player, "A chest spawn has been set to your location in arena &e" + arena.getName());
+                        } else {
+                            sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
+                        }
+                    } else if (args[0].equalsIgnoreCase("setlobby")) {
+                        if (Arenas.arenaExists(args[1])) {
+                            final Arena arena = Arenas.getArena(args[1]);
+                            arena.setLobbySpawn(player.getLocation());
+                            sendMessage(player, "A lobby has been set to your location in arena &e" + arena.getName());
+                        } else {
+                            sendMessage(player, "Arena &c" + args[1] + "&f doesn't exist, use '/br list' to view existing arenas.");
+                        }
                     }
                 }
             }
@@ -275,9 +275,5 @@ public class UltimaRoyale extends JavaPlugin implements Listener {
 
     public static void sendMessage(final Player player, final String Message) {
         player.sendMessage(ChatColor.translateAlternateColorCodes('&', settings.getConfig().getString("Messages.Prefix") + Message));
-    }
-
-    public static UltimaRoyale getInstance() {
-        return instance;
     }
 }

@@ -1,6 +1,6 @@
 name: UltimaRoyale
 main: ml.matrixdevteam.ultimaroyale.UltimaRoyale
-version: version
+version: ${version}
 author: GMatrixGames
 description: The ultimate battle royale plugin
 depends: [Vault, EffectLib]
