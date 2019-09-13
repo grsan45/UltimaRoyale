@@ -274,6 +274,6 @@ public class UltimaRoyale extends JavaPlugin implements Listener {
     }
 
     public static void sendMessage(final Player player, final String Message) {
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&', settings.getConfig().getString("Messages.Prefix") + Message));
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&', settings.getConfig().getString("messages.prefix") + Message));
     }
 }
